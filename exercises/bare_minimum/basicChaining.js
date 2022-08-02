@@ -12,25 +12,21 @@ var fs = require('fs');
 var Promise = require('bluebird');
 var writeFile = require('./promisification');
 var readFile = require('./promiseConstructor');
+var writeFileAsync = Promise.promisify(fs.writeFile); //no need for cb function
 
 
 var fetchProfileAndWriteToFile = function(readFilePath, writeFilePath) {
   return readFile.pluckFirstLineFromFileAsync(readFilePath)
     .then(function(user) {
       if (user) {
-        writeFile.getGitHubProfileAsync(user);
+        return writeFile.getGitHubProfileAsync(user);
       } else {
         console.log('eeeee');
       }
     })
     .then(function(data) {
-      if (data) {
-        fs.writeFile(writeFile, data, () => {});
-      } else {
-        console.log('err');
-      }
+      return writeFileAsync(writeFilePath, JSON.stringify(data));
     });
-
 };
 
 // Export these functions so we can test them
